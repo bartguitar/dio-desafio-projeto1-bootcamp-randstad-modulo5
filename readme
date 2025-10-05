@@ -1,0 +1,113 @@
+# 🛒 Modelo de Banco de Dados - E-Commerce
+
+## 📘 Descrição do Projeto
+Este projeto apresenta o **modelo conceitual e lógico** de um banco de dados para um sistema de **E-Commerce**, desenvolvido como parte de um **desafio de modelagem**.  
+O objetivo foi estruturar as entidades, relacionamentos e regras de negócio que representam o funcionamento de um comércio eletrônico, incluindo clientes, pedidos, produtos, fornecedores e estoque.
+
+## 🧩 Objetivo do Desafio
+Refinar o modelo original, acrescentando novos requisitos de negócio:
+
+1. **Cliente PJ e PF:**  
+   Uma conta pode ser Pessoa Física ou Pessoa Jurídica — mas **não pode ser as duas**.  
+   > Implementado por meio das tabelas `Cliente_PF` e `Cliente_PJ`, ligadas 1:1 à tabela `Cliente`.
+
+2. **Pagamento:**  
+   Um pedido pode ter **mais de uma forma de pagamento**.  
+   > Modelado com as tabelas `Forma_Pagamento` e `Pedido_has_Pagamento` (relação N:N).
+
+3. **Entrega:**  
+   Cada pedido possui uma **entrega** com **status** e **código de rastreio**.  
+   > Criada a tabela `Entrega`, associada 1:1 à tabela `Pedido`.
+
+---
+
+## 🧱 Estrutura do Modelo
+
+### Tabelas Principais
+| Tabela | Descrição |
+|--------|------------|
+| **Cliente** | Armazena os dados base do cliente e define o tipo (PF/PJ). |
+| **Cliente_PF** | Dados específicos de pessoa física (CPF, Data de Nascimento). |
+| **Cliente_PJ** | Dados específicos de pessoa jurídica (CNPJ, Razão Social). |
+| **Produto** | Cadastro de produtos com categoria, descrição e valor. |
+| **Pedido** | Representa a compra realizada pelo cliente. |
+| **Entrega** | Informações sobre o envio, status e código de rastreio do pedido. |
+| **Forma_Pagamento** | Tipos de pagamento disponíveis (Cartão, Pix, Boleto etc.). |
+| **Pedido_has_Pagamento** | Relação N:N entre pedido e forma de pagamento. |
+| **Fornecedor / Estoque / Terceiro** | Estrutura de fornecimento, vendedores e controle de estoque. |
+
+---
+
+## 🔗 Relacionamentos Principais
+
+| Relação | Tipo | Descrição |
+|----------|------|-----------|
+| Cliente ↔ Cliente_PF | 1:1 | Um cliente pode ser PF. |
+| Cliente ↔ Cliente_PJ | 1:1 | Um cliente pode ser PJ. |
+| Pedido ↔ Entrega | 1:1 | Cada pedido possui uma entrega. |
+| Pedido ↔ Forma_Pagamento | N:N | Um pedido pode ter várias formas de pagamento. |
+| Produto ↔ Pedido | N:N | Um pedido pode conter vários produtos. |
+| Produto ↔ Estoque | N:N | Controle de quantidades em estoque. |
+
+---
+
+## 🧮 Modelo Lógico (Resumo das Tabelas)
+
+```sql
+CREATE TABLE Cliente (
+  idCliente INT PRIMARY KEY,
+  Tipo ENUM('PF','PJ'),
+  Endereco VARCHAR(100)
+);
+
+CREATE TABLE Cliente_PF (
+  idCliente INT PRIMARY KEY,
+  CPF VARCHAR(14),
+  DataNascimento DATE,
+  FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente)
+);
+
+CREATE TABLE Cliente_PJ (
+  idCliente INT PRIMARY KEY,
+  CNPJ VARCHAR(18),
+  RazaoSocial VARCHAR(60),
+  FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente)
+);
+
+CREATE TABLE Forma_Pagamento (
+  idFormaPagamento INT PRIMARY KEY,
+  Tipo VARCHAR(30)
+);
+
+CREATE TABLE Pedido_has_Pagamento (
+  Pedido_idPedido INT,
+  FormaPagamento_idFormaPagamento INT,
+  Valor FLOAT,
+  PRIMARY KEY (Pedido_idPedido, FormaPagamento_idFormaPagamento),
+  FOREIGN KEY (Pedido_idPedido) REFERENCES Pedido(idPedido),
+  FOREIGN KEY (FormaPagamento_idFormaPagamento) REFERENCES Forma_Pagamento(idFormaPagamento)
+);
+
+CREATE TABLE Entrega (
+  idEntrega INT PRIMARY KEY,
+  Pedido_idPedido INT,
+  Status VARCHAR(45),
+  CodigoRastreio VARCHAR(45),
+  DataEnvio DATE,
+  DataEntregaPrevista DATE,
+  FOREIGN KEY (Pedido_idPedido) REFERENCES Pedido(idPedido)
+);
+
+
+🖼️ Diagrama EER
+
+O diagrama EER completo reflete todas as entidades, relacionamentos e regras de integridade.
+
+
+🧠 Tecnologias Utilizadas
+
+MySQL Workbench para modelagem do banco de dados
+
+SQL ANSI para definição das tabelas e relacionamentos
+
+GitHub para versionamento e documentação
